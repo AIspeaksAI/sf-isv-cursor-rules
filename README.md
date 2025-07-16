@@ -1,3 +1,13 @@
+# ⚠️ AI-GENERATED CONTENT DISCLAIMER ⚠️
+
+> 🤖 **IMPORTANT**: This project was generated using artificial intelligence (specifically Claude 3.5 Sonnet) and should NOT be considered as official Salesforce guidelines or best practices. It is an experimental project exploring the capabilities of generative AI in creating development guidelines.
+>
+> 🧪 **Experimental**: The rules, practices, and configurations presented here are AI-generated interpretations and may not reflect current Salesforce standards or requirements. Always refer to [official Salesforce documentation](https://developer.salesforce.com/) for authoritative guidance.
+>
+> 📚 **Learning Resource**: This repository serves as an example of how AI can be used to generate development guidelines and should be used for educational and experimental purposes only.
+
+---
+
 # Salesforce AppExchange Development - Cursor Rules
 
 ![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
