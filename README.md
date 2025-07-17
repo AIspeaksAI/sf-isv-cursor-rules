@@ -6,6 +6,12 @@
 >
 > 📚 **Learning Resource**: This repository serves as an example of how AI can be used to generate development guidelines and should be used for educational and experimental purposes only.
 
+## 📺 Featured in YouTube Tutorial
+
+This set of rules was created as part of the YouTube tutorial ["Supercharge Salesforce Development for ISV with Cursor AI & Gemini"](https://www.youtube.com/watch?v=HBCEcbFH8Po). Watch the video to learn how these rules were generated and how to leverage AI tools to enhance your Salesforce development workflow.
+
+[![Watch the Tutorial](https://img.shields.io/badge/Watch%20Tutorial-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=HBCEcbFH8Po)
+
 ---
 
 # Salesforce AppExchange Development - Cursor Rules
