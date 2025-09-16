@@ -1,0 +1,520 @@
+---
+description: Best practices for Salesforce DX development focused on GenAI capabilities including Prompt Templates and Agentforce Agents
+globs: **/*.cls,**/*.apex,**/*.js,**/*.lwc,**/*.cmp,**/*.component,**/*.xml,**/*.prompt-meta.xml
+alwaysApply: false
+---
+
+# Salesforce GenAI Development Best Practices
+
+This rule provides comprehensive guidelines for developing Salesforce applications with GenAI capabilities, focusing on Prompt Templates and Agentforce Agents.
+
+## Prompt Template Development
+
+### 1. Prompt Template Structure
+
+**Metadata File Structure:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<PromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Descriptive Template Name</label>
+    <description>Clear description of template purpose</description>
+    <promptText>
+        You are a {role} helping with {task}.
+        
+        Context:
+        - Customer: {!Contact.Name}
+        - Account: {!Contact.Account.Name}
+        - Additional Data: {!CustomField__c}
+        
+        Instructions:
+        1. Be {tone} and {style}
+        2. Address the customer by name
+        3. Provide specific, actionable solutions
+        4. Reference relevant data when appropriate
+        
+        User Query: {!UserInput}
+        
+        Generate a personalized response.
+    </promptText>
+    <modelParameters>
+        <temperature>0.7</temperature>
+        <maxTokens>500</maxTokens>
+    </modelParameters>
+    <isActive>true</isActive>
+</PromptTemplate>
+```
+
+### 2. Apex Integration for Prompt Templates
+
+**Prompt Template Action Class:**
+```apex
+public class PromptTemplateAction {
+    @InvocableMethod(
+        label='Generate AI Response'
+        description='Uses prompt template to generate contextual responses'
+        category='AI Actions'
+    )
+    public static List<PromptResponse> generateResponse(List<PromptRequest> requests) {
+        List<PromptResponse> responses = new List<PromptResponse>();
+        
+        for (PromptRequest request : requests) {
+            try {
+                // Validate inputs
+                validateRequest(request);
+                
+                // Gather contextual data
+                Map<String, Object> contextData = gatherContextData(request);
+                
+                // Call prompt template
+                String response = executePromptTemplate(request.templateName, contextData);
+                
+                // Post-process response
+                String finalResponse = postProcessResponse(response, request.preferences);
+                
+                responses.add(new PromptResponse(finalResponse, 'success', null));
+                
+            } catch (Exception e) {
+                logError('PromptTemplateAction', e, request);
+                responses.add(new PromptResponse(
+                    'I apologize, but I encountered an error processing your request.',
+                    'error',
+                    e.getMessage()
+                ));
+            }
+        }
+        
+        return responses;
+    }
+    
+    private static void validateRequest(PromptRequest request) {
+        if (String.isBlank(request.templateName)) {
+            throw new IllegalArgumentException('Template name is required');
+        }
+        if (String.isBlank(request.userInput)) {
+            throw new IllegalArgumentException('User input is required');
+        }
+    }
+    
+    private static Map<String, Object> gatherContextData(PromptRequest request) {
+        Map<String, Object> contextData = new Map<String, Object>();
+        
+        // Add user context
+        contextData.put('User', getCurrentUserContext());
+        
+        // Add record context if provided
+        if (request.recordId != null) {
+            contextData.put('Record', getRecordContext(request.recordId));
+        }
+        
+        // Add business context
+        contextData.put('BusinessRules', getBusinessRules(request.context));
+        
+        return contextData;
+    }
+    
+    public class PromptRequest {
+        @InvocableVariable(label='Template Name' description='Name of the prompt template to use')
+        public String templateName;
+        
+        @InvocableVariable(label='User Input' description='User query or input')
+        public String userInput;
+        
+        @InvocableVariable(label='Record ID' description='Related Salesforce record ID')
+        public Id recordId;
+        
+        @InvocableVariable(label='Context' description='Additional context for the prompt')
+        public String context;
+        
+        @InvocableVariable(label='Preferences' description='User preferences for response style')
+        public String preferences;
+    }
+    
+    public class PromptResponse {
+        @InvocableVariable(label='Response' description='Generated AI response')
+        public String response;
+        
+        @InvocableVariable(label='Status' description='Success or error status')
+        public String status;
+        
+        @InvocableVariable(label='Error Message' description='Error details if any')
+        public String errorMessage;
+        
+        public PromptResponse(String response, String status, String errorMessage) {
+            this.response = response;
+            this.status = status;
+            this.errorMessage = errorMessage;
+        }
+    }
+}
+```
+
+## Agentforce Agent Development
+
+### 3. Agent Action Development
+
+**Core Agent Action Pattern:**
+```apex
+public class AgentAction {
+    @InvocableMethod(
+        label='Agent Action Name'
+        description='Clear description of what this action does'
+        category='Agent Actions'
+    )
+    public static List<ActionResponse> execute(List<ActionRequest> requests) {
+        List<ActionResponse> responses = new List<ActionResponse>();
+        
+        for (ActionRequest request : requests) {
+            try {
+                // Validate and sanitize inputs
+                validateAndSanitizeInput(request);
+                
+                // Check permissions
+                if (!hasRequiredPermissions(request)) {
+                    responses.add(new ActionResponse(
+                        'You do not have permission to perform this action.',
+                        'permission_denied',
+                        null
+                    ));
+                    continue;
+                }
+                
+                // Execute business logic
+                String result = executeBusinessLogic(request);
+                
+                // Format response for agent
+                String formattedResponse = formatForAgent(result, request);
+                
+                responses.add(new ActionResponse(formattedResponse, 'success', null));
+                
+            } catch (Exception e) {
+                logAgentError('AgentAction', e, request);
+                responses.add(new ActionResponse(
+                    'I encountered an error while processing your request.',
+                    'error',
+                    e.getMessage()
+                ));
+            }
+        }
+        
+        return responses;
+    }
+    
+    private static void validateAndSanitizeInput(ActionRequest request) {
+        if (String.isBlank(request.input)) {
+            throw new IllegalArgumentException('Input is required');
+        }
+        
+        // Sanitize input to prevent injection attacks
+        request.input = request.input.replaceAll('[<>"\']', '');
+    }
+    
+    private static Boolean hasRequiredPermissions(ActionRequest request) {
+        // Implement permission checks based on action type
+        return true; // Placeholder
+    }
+    
+    private static String executeBusinessLogic(ActionRequest request) {
+        // Implement core business logic
+        return 'Action completed successfully';
+    }
+    
+    private static String formatForAgent(String result, ActionRequest request) {
+        // Format response to be agent-friendly
+        return result;
+    }
+}
+```
+
+### 4. Security Best Practices
+
+**Secure Agent Action Handler:**
+```apex
+public class SecureAgentHandler {
+    @InvocableMethod(label='Secure Agent Action')
+    public static List<SecureResponse> processSecurely(List<SecureRequest> requests) {
+        List<SecureResponse> responses = new List<SecureResponse>();
+        
+        for (SecureRequest request : requests) {
+            try {
+                // Input validation
+                if (!isValidInput(request)) {
+                    responses.add(new SecureResponse(
+                        'Invalid input provided.',
+                        'validation_error',
+                        null
+                    ));
+                    continue;
+                }
+                
+                // Security checks
+                if (!passesSecurityChecks(request)) {
+                    responses.add(new SecureResponse(
+                        'Security check failed.',
+                        'security_error',
+                        null
+                    ));
+                    continue;
+                }
+                
+                // Process with audit logging
+                String result = processWithAudit(request);
+                
+                responses.add(new SecureResponse(result, 'success', null));
+                
+            } catch (Exception e) {
+                logSecurityEvent(request, e);
+                responses.add(new SecureResponse(
+                    'An error occurred processing your request.',
+                    'error',
+                    null
+                ));
+            }
+        }
+        
+        return responses;
+    }
+    
+    private static Boolean isValidInput(SecureRequest request) {
+        // Validate input format and content
+        return !String.isBlank(request.input) && 
+               request.input.length() <= 1000 &&
+               !containsMaliciousContent(request.input);
+    }
+    
+    private static Boolean containsMaliciousContent(String input) {
+        String lowerInput = input.toLowerCase();
+        return lowerInput.contains('ignore previous instructions') ||
+               lowerInput.contains('system:') ||
+               lowerInput.contains('override') ||
+               lowerInput.contains('<script>');
+    }
+    
+    private static Boolean passesSecurityChecks(SecureRequest request) {
+        // Check user permissions, rate limiting, etc.
+        return true; // Placeholder
+    }
+    
+    private static void logSecurityEvent(SecureRequest request, Exception e) {
+        // Log security events for monitoring
+        System.debug('Security Event: ' + e.getMessage());
+    }
+}
+```
+
+### 5. Data Integration Patterns
+
+**Dynamic Data Grounding:**
+```apex
+public class DataGroundingService {
+    @InvocableMethod(label='Ground Data for AI')
+    public static List<GroundingResponse> groundData(List<GroundingRequest> requests) {
+        List<GroundingResponse> responses = new List<GroundingResponse>();
+        
+        for (GroundingRequest request : requests) {
+            try {
+                Map<String, Object> groundedData = new Map<String, Object>();
+                
+                // Ground with Salesforce data
+                if (request.recordId != null) {
+                    groundedData.put('Record', getRecordData(request.recordId, request.objectType));
+                }
+                
+                // Ground with related data
+                if (request.includeRelated) {
+                    groundedData.put('RelatedData', getRelatedData(request.recordId));
+                }
+                
+                // Ground with user context
+                groundedData.put('UserContext', getUserContext());
+                
+                // Ground with business context
+                groundedData.put('BusinessContext', getBusinessContext(request.context));
+                
+                responses.add(new GroundingResponse(groundedData, 'success', null));
+                
+            } catch (Exception e) {
+                responses.add(new GroundingResponse(
+                    new Map<String, Object>(),
+                    'error',
+                    e.getMessage()
+                ));
+            }
+        }
+        
+        return responses;
+    }
+    
+    private static Map<String, Object> getRecordData(Id recordId, String objectType) {
+        // Dynamic SOQL based on object type
+        String query = 'SELECT Id, Name FROM ' + objectType + ' WHERE Id = :recordId';
+        SObject record = Database.query(query);
+        
+        Map<String, Object> recordData = new Map<String, Object>();
+        for (String field : record.getSObjectType().getDescribe().fields.getMap().keySet()) {
+            recordData.put(field, record.get(field));
+        }
+        
+        return recordData;
+    }
+    
+    private static Map<String, Object> getUserContext() {
+        User currentUser = [SELECT Id, Name, Email, Profile.Name FROM User WHERE Id = :UserInfo.getUserId()];
+        return new Map<String, Object>{
+            'Name' => currentUser.Name,
+            'Email' => currentUser.Email,
+            'Profile' => currentUser.Profile.Name
+        };
+    }
+}
+```
+
+### 6. Testing Patterns
+
+**Comprehensive Test Coverage:**
+```apex
+@IsTest
+public class GenAITestSuite {
+    @TestSetup
+    static void setup() {
+        // Create test data for AI scenarios
+        Account testAccount = new Account(Name = 'Test Account');
+        insert testAccount;
+        
+        Contact testContact = new Contact(
+            FirstName = 'John',
+            LastName = 'Doe',
+            Email = 'john.doe@test.com',
+            AccountId = testAccount.Id
+        );
+        insert testContact;
+    }
+    
+    @IsTest
+    static void testPromptTemplateAction() {
+        Contact testContact = [SELECT Id FROM Contact LIMIT 1];
+        
+        PromptTemplateAction.PromptRequest request = 
+            new PromptTemplateAction.PromptRequest();
+        request.templateName = 'Customer_Service_Template';
+        request.userInput = 'I need help with my account';
+        request.recordId = testContact.Id;
+        
+        Test.startTest();
+        List<PromptTemplateAction.PromptResponse> responses = 
+            PromptTemplateAction.generateResponse(new List<PromptTemplateAction.PromptRequest>{request});
+        Test.stopTest();
+        
+        System.assertEquals(1, responses.size());
+        System.assertEquals('success', responses[0].status);
+        System.assertNotEquals(null, responses[0].response);
+    }
+    
+    @IsTest
+    static void testAgentAction() {
+        AgentAction.ActionRequest request = new AgentAction.ActionRequest();
+        request.input = 'Test input for agent';
+        
+        Test.startTest();
+        List<AgentAction.ActionResponse> responses = 
+            AgentAction.execute(new List<AgentAction.ActionRequest>{request});
+        Test.stopTest();
+        
+        System.assertEquals(1, responses.size());
+        System.assertEquals('success', responses[0].status);
+    }
+    
+    @IsTest
+    static void testSecurityValidation() {
+        SecureAgentHandler.SecureRequest request = new SecureAgentHandler.SecureRequest();
+        request.input = '<script>alert("xss")</script>';
+        
+        Test.startTest();
+        List<SecureAgentHandler.SecureResponse> responses = 
+            SecureAgentHandler.processSecurely(new List<SecureAgentHandler.SecureRequest>{request});
+        Test.stopTest();
+        
+        System.assertEquals(1, responses.size());
+        System.assertEquals('validation_error', responses[0].status);
+    }
+}
+```
+
+## Development Guidelines
+
+### 7. Code Organization
+
+**File Structure:**
+```
+force-app/main/default/
+├── classes/
+│   ├── PromptTemplates/          # Prompt template actions
+│   ├── AgentActions/             # Agent-specific actions
+│   ├── Security/                 # Security and validation
+│   └── Services/                 # Data grounding services
+├── prompts/                      # Prompt template metadata
+└── agents/                       # Agent configurations
+```
+
+### 8. Performance Optimization
+
+**Bulk Processing:**
+```apex
+public class BulkGenAIProcessor {
+    @InvocableMethod(label='Process Multiple AI Requests')
+    public static List<BulkResponse> processBulk(List<BulkRequest> requests) {
+        List<BulkResponse> responses = new List<BulkResponse>();
+        
+        // Process in batches to avoid governor limits
+        for (Integer i = 0; i < requests.size(); i += 200) {
+            List<BulkRequest> batch = new List<BulkRequest>();
+            for (Integer j = i; j < Math.min(i + 200, requests.size()); j++) {
+                batch.add(requests[j]);
+            }
+            
+            List<BulkResponse> batchResponses = processBatch(batch);
+            responses.addAll(batchResponses);
+        }
+        
+        return responses;
+    }
+    
+    private static List<BulkResponse> processBatch(List<BulkRequest> batch) {
+        // Process batch of requests
+        return new List<BulkResponse>();
+    }
+}
+```
+
+### 9. Error Handling and Logging
+
+**Comprehensive Error Handling:**
+```apex
+public class GenAIErrorHandler {
+    public static void logError(String className, Exception e, Object context) {
+        // Log error with context for debugging
+        System.debug(LoggingLevel.ERROR, 
+            'GenAI Error in ' + className + ': ' + e.getMessage() + 
+            ' Context: ' + JSON.serialize(context)
+        );
+    }
+    
+    public static String formatErrorForAgent(Exception e, String context) {
+        // Format errors to be agent-friendly
+        return 'I apologize, but I encountered an error while processing your request. ' +
+               'Please try again or contact support if the issue persists.';
+    }
+}
+```
+
+## Best Practices Summary
+
+1. **Always use @InvocableMethod** for agent actions
+2. **Implement comprehensive error handling** with user-friendly messages
+3. **Validate and sanitize all inputs** to prevent security issues
+4. **Use bulk processing patterns** for performance
+5. **Ground prompts with relevant data** for better AI responses
+6. **Test thoroughly** with various scenarios and edge cases
+7. **Log errors and security events** for monitoring
+8. **Follow naming conventions** for clarity and maintainability
+9. **Document your code** with clear descriptions and examples
+10. **Consider performance implications** of AI operations
