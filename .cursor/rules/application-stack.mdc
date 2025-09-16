@@ -1,0 +1,170 @@
+---
+description: Salesforce development stack documentation with dependency versions and best practices
+globs: 
+  - "package.json"
+  - "package-lock.json"
+  - "**/*.js"
+  - "**/*.cls"
+  - "**/*.lwc"
+alwaysApply: true
+---
+
+# Salesforce Development Stack
+
+This document outlines the technology stack, dependencies, and best practices for the sf-isv-cursor-rules Salesforce project.
+
+## Technology Stack Overview
+
+This is a **Salesforce DX project** focused on Lightning Web Components (LWC) development with modern JavaScript tooling and testing frameworks.
+
+### Core Technologies
+- **Salesforce DX**: Modern Salesforce development framework
+- **Lightning Web Components (LWC)**: Modern web standards-based component framework
+- **Aura Components**: Legacy component framework (for compatibility)
+- **Apex**: Salesforce's server-side programming language
+- **Node.js**: JavaScript runtime for development tools
+- **Jest**: JavaScript testing framework
+
+## Major Dependencies Analysis
+
+### Development Dependencies
+
+| Package | Version | Status | Purpose | Best Practice Notes |
+|---------|---------|--------|---------|-------------------|
+| `@salesforce/sfdx-lwc-jest` | ^7.0.1 | ✅ Current | LWC unit testing | Latest stable version for LWC testing |
+| `eslint` | 8.57.1 | ⚠️ Legacy | Code linting | **Consider upgrading to v9.x** - v8 is approaching end-of-life |
+| `@salesforce/eslint-config-lwc` | ^3.2.3 | ✅ Current | LWC ESLint rules | Salesforce-maintained, keep updated |
+| `@lwc/eslint-plugin-lwc` | ^1.1.2 | ✅ Current | LWC-specific linting | Essential for LWC development |
+| `@salesforce/eslint-plugin-aura` | ^2.0.0 | ✅ Current | Aura component linting | For legacy Aura support |
+| `@salesforce/eslint-plugin-lightning` | ^1.0.0 | ✅ Current | Lightning-specific rules | Salesforce Lightning linting |
+| `prettier` | ^3.1.0 | ✅ Current | Code formatting | Latest stable, excellent for Salesforce |
+| `prettier-plugin-apex` | ^2.0.1 | ✅ Current | Apex formatting | Essential for Apex code formatting |
+| `@prettier/plugin-xml` | ^3.2.2 | ✅ Current | XML formatting | For Salesforce metadata files |
+| `husky` | ^9.1.5 | ✅ Current | Git hooks | Latest version, excellent for pre-commit |
+| `lint-staged` | ^15.1.0 | ✅ Current | Staged file linting | Works well with Husky v9+ |
+
+### Key Observations
+
+#### ✅ **Well-Maintained Stack**
+- All Salesforce-specific packages are current
+- Prettier configuration is comprehensive for Salesforce development
+- Testing setup with Jest is modern and appropriate
+
+#### ⚠️ **Areas for Improvement**
+- **ESLint 8.57.1**: This version is approaching end-of-life. Consider upgrading to ESLint 9.x
+- **Missing TypeScript**: Consider adding TypeScript support for better type safety
+
+## Development Scripts Analysis
+
+### Available Scripts
+```json
+{
+  "lint": "eslint **/{aura,lwc}/**/*.js",
+  "test": "npm run test:unit",
+  "test:unit": "sfdx-lwc-jest",
+  "test:unit:watch": "sfdx-lwc-jest --watch",
+  "test:unit:debug": "sfdx-lwc-jest --debug",
+  "test:unit:coverage": "sfdx-lwc-jest --coverage",
+  "prettier": "prettier --write \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
+  "prettier:verify": "prettier --check \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
+  "postinstall": "husky install",
+  "precommit": "lint-staged"
+}
+```
+
+### Script Quality Assessment
+- ✅ **Comprehensive testing**: Unit tests with watch, debug, and coverage modes
+- ✅ **Code quality**: ESLint and Prettier integration
+- ✅ **Git hooks**: Husky + lint-staged for pre-commit quality checks
+- ✅ **File coverage**: Prettier handles all Salesforce file types
+
+## Best Practices for This Stack
+
+### 1. **Dependency Management**
+```bash
+# Regular maintenance commands
+npm audit                    # Check for vulnerabilities
+npm outdated                # Check for outdated packages
+npm update                  # Update within semver ranges
+```
+
+### 2. **Code Quality Workflow**
+```bash
+# Before committing
+npm run prettier:verify     # Check formatting
+npm run lint               # Check linting
+npm run test:unit:coverage # Run tests with coverage
+```
+
+### 3. **Development Workflow**
+```bash
+# Active development
+npm run test:unit:watch    # Watch mode for tests
+npm run prettier          # Format code
+```
+
+### 4. **Version Management Strategy**
+- **Salesforce packages**: Use `^` for minor/patch updates
+- **Core tools (ESLint)**: Consider pinning major versions
+- **Prettier plugins**: Keep updated for latest features
+
+## Recommended Upgrades
+
+### Immediate (High Priority)
+1. **Upgrade ESLint to v9.x**
+   ```bash
+   npm install --save-dev eslint@^9.0.0
+   ```
+
+### Future Considerations (Medium Priority)
+1. **Add TypeScript support**
+   ```bash
+   npm install --save-dev typescript @types/node
+   ```
+
+2. **Consider adding more testing tools**
+   - `@testing-library/jest-dom` for enhanced Jest matchers
+   - `@salesforce/sfdx-lwc-jest-utils` for LWC testing utilities
+
+## Security Considerations
+
+### Current Security Posture
+- ✅ All packages use recent versions
+- ✅ Husky ensures pre-commit quality checks
+- ✅ ESLint catches potential security issues
+
+### Security Best Practices
+1. **Regular audits**: Run `npm audit` monthly
+2. **Dependency updates**: Use Dependabot for automated updates
+3. **Lock file integrity**: Always commit `package-lock.json`
+4. **Minimal dependencies**: Only add packages when necessary
+
+## Performance Considerations
+
+### Current Performance
+- ✅ Jest is configured for optimal LWC testing
+- ✅ Prettier is fast and efficient
+- ✅ ESLint is configured for Salesforce best practices
+
+### Performance Tips
+1. **Use Jest watch mode** for active development
+2. **Configure ESLint cache** for faster subsequent runs
+3. **Use Prettier ignore patterns** for generated files
+
+## Maintenance Schedule
+
+### Weekly
+- Run `npm audit` to check for vulnerabilities
+- Review `npm outdated` for available updates
+
+### Monthly
+- Update non-breaking dependencies
+- Review and update Salesforce packages
+- Check for new Prettier/ESLint rules
+
+### Quarterly
+- Major dependency updates (ESLint, Jest)
+- Review and update development scripts
+- Security audit of all dependencies
+
+This stack provides a solid foundation for Salesforce development with modern tooling and best practices. The main focus should be on upgrading ESLint and considering TypeScript adoption for enhanced type safety.
