@@ -1,0 +1,284 @@
+---
+description: Best practices for creating scratch orgs with Agentforce and Data Cloud enabled for Einstein Generative AI development
+globs: **/config/*.json,**/project-scratch-def.json
+alwaysApply: true
+---
+
+# Scratch Org Configuration for Agentforce and Data Cloud
+
+This rule ensures all scratch orgs are created with Agentforce and Data Cloud capabilities enabled for Einstein Generative AI development.
+
+## Required Configuration
+
+All scratch org definition files (typically `config/project-scratch-def.json`) MUST include the following configuration to enable Agentforce and Data Cloud:
+
+### Minimum Required Configuration
+
+```json
+{
+  "orgName": "Your Org Name",
+  "edition": "Developer",
+  "features": [
+    "Einstein1AIPlatform",
+    "EnableSetPasswordInApi"
+  ],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "einsteinGptSettings": {
+      "enableEinsteinGptPlatform": true
+    },
+    "agentPlatformSettings": {
+      "enableAgentPlatform": true
+    }
+  }
+}
+```
+
+### Configuration Breakdown
+
+#### Required Feature Flags
+- **`Einstein1AIPlatform`**: Enables Einstein Generative AI capabilities including Agentforce, Prompt Builder, Model Builder, and Models API
+- **`EnableSetPasswordInApi`**: Allows password management through API (standard for scratch orgs)
+
+#### Required Settings
+
+**Einstein GPT Settings:**
+```json
+"einsteinGptSettings": {
+  "enableEinsteinGptPlatform": true
+}
+```
+Automatically enables Einstein Generative AI platform features.
+
+**Agent Platform Settings:**
+```json
+"agentPlatformSettings": {
+  "enableAgentPlatform": true
+}
+```
+Automatically enables Agentforce capabilities for building and deploying AI agents.
+
+**Lightning Experience Settings:**
+```json
+"lightningExperienceSettings": {
+  "enableS1DesktopEnabled": true
+}
+```
+Ensures Lightning Experience is enabled (required for modern Salesforce features).
+
+## Supported Editions
+
+Einstein Generative AI features are supported in the following editions:
+- **Developer Edition** (recommended for development)
+- **Enterprise Edition**
+
+## Prerequisites
+
+### Dev Hub Requirements
+1. **Data Cloud Licenses**: Your Dev Hub org MUST have Data Cloud licenses provisioned
+2. **Enable Dev Hub**: The Dev Hub feature must be enabled in your production or Developer Edition org
+3. **API Access**: Ensure you have API access enabled
+
+### Salesforce CLI Setup
+```bash
+# Install/Update Salesforce CLI
+npm install -g @salesforce/cli
+
+# Verify CLI version
+sf --version
+
+# Authenticate to Dev Hub
+sf org login web --set-default-dev-hub --alias MyDevHub
+```
+
+## Creating a Scratch Org
+
+### Step 1: Create the Definition File
+Create or update `config/project-scratch-def.json` with the required configuration above.
+
+### Step 2: Create the Scratch Org
+```bash
+# Create scratch org with definition file
+sf org create scratch --definition-file config/project-scratch-def.json --alias agentforce-dev --duration-days 30 --set-default
+
+# Alternative: Create with specific Dev Hub
+sf org create scratch --definition-file config/project-scratch-def.json --target-dev-hub MyDevHub --alias agentforce-dev --duration-days 30
+```
+
+### Step 3: Open the Scratch Org
+```bash
+# Open the scratch org
+sf org open --target-org agentforce-dev
+```
+
+### Step 4: Verify Setup
+After opening the org, verify that the following are available:
+- **Setup > Einstein** - Einstein Generative AI setup pages
+- **App Launcher > Prompt Builder** - For creating prompt templates
+- **App Launcher > Model Builder** - For creating and testing AI models
+- **Setup > Agentforce** - For configuring AI agents
+
+## Advanced Configuration
+
+### Additional Recommended Features
+```json
+{
+  "orgName": "Your Org Name",
+  "edition": "Developer",
+  "features": [
+    "Einstein1AIPlatform",
+    "EnableSetPasswordInApi",
+    "Communities",
+    "ServiceCloud",
+    "FlowRunTimeApi"
+  ],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "einsteinGptSettings": {
+      "enableEinsteinGptPlatform": true
+    },
+    "agentPlatformSettings": {
+      "enableAgentPlatform": true
+    },
+    "mobileSettings": {
+      "enableS1EncryptedStoragePref2": false
+    },
+    "securitySettings": {
+      "enableAdminLoginAsAnyUser": true,
+      "sessionSettings": {
+        "forceRelogin": false
+      }
+    }
+  }
+}
+```
+
+### Additional Features Explained
+- **Communities**: Enable Experience Cloud for external-facing agent experiences
+- **ServiceCloud**: Enable Service Cloud features for customer service agents
+- **FlowRunTimeApi**: Enable Flow runtime capabilities for agent actions
+
+### Additional Settings Explained
+- **securitySettings.enableAdminLoginAsAnyUser**: Allows admin to login as any user for testing
+- **sessionSettings.forceRelogin**: Disable forced relogin for development convenience
+- **mobileSettings.enableS1EncryptedStoragePref2**: Mobile storage preferences
+
+## Common Issues and Solutions
+
+### Issue: "This feature isn't enabled for your org"
+**Solution**: Ensure your Dev Hub has Data Cloud licenses and the `Einstein1AIPlatform` feature is included in your scratch org definition.
+
+### Issue: "Agentforce is not available"
+**Solution**: Verify that both `enableEinsteinGptPlatform` and `enableAgentPlatform` settings are set to `true`.
+
+### Issue: "Feature not supported in Developer Edition"
+**Solution**: Some advanced features require Enterprise Edition. Check the feature documentation for edition requirements.
+
+### Issue: Scratch org creation fails with "Unknown feature"
+**Solution**: Update your Salesforce CLI to the latest version:
+```bash
+npm update -g @salesforce/cli
+```
+
+## Best Practices
+
+### 1. Version Control
+Always commit your scratch org definition files to version control:
+```bash
+git add config/project-scratch-def.json
+git commit -m "Configure scratch org for Agentforce and Data Cloud"
+```
+
+### 2. Multiple Definition Files
+Create separate definition files for different use cases:
+- `config/project-scratch-def.json` - Standard development
+- `config/agentforce-scratch-def.json` - Agentforce-specific development
+- `config/testing-scratch-def.json` - Testing environments
+
+### 3. Duration Management
+Set appropriate duration based on use case:
+- **7 days**: Quick feature testing
+- **14 days**: Standard development sprint
+- **30 days**: Extended development (maximum)
+
+```bash
+sf org create scratch --definition-file config/project-scratch-def.json --duration-days 14
+```
+
+### 4. Aliases
+Use descriptive aliases for scratch orgs:
+```bash
+sf org create scratch --definition-file config/project-scratch-def.json --alias feature-agent-builder --duration-days 14
+```
+
+### 5. Automation
+Create shell scripts for common scratch org workflows:
+
+**create-agent-org.sh:**
+```bash
+#!/bin/bash
+# Create Agentforce-enabled scratch org
+
+sf org create scratch \
+  --definition-file config/project-scratch-def.json \
+  --alias agentforce-$(date +%Y%m%d) \
+  --duration-days 30 \
+  --set-default
+
+sf org open
+```
+
+## Integration with CI/CD
+
+### GitHub Actions Example
+```yaml
+name: Create Agentforce Scratch Org
+on: [push]
+jobs:
+  create-scratch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Salesforce CLI
+        run: npm install -g @salesforce/cli
+      - name: Authenticate Dev Hub
+        run: echo "${{ secrets.DEVHUB_AUTH_URL }}" | sf org login sfdx-url --set-default-dev-hub
+      - name: Create Scratch Org
+        run: sf org create scratch --definition-file config/project-scratch-def.json --duration-days 1 --wait 10
+```
+
+## Documentation References
+
+- [Scratch Org Access - Salesforce Developer Guide](https://developer.salesforce.com/docs/einstein/genai/guide/scratch-org.html)
+- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/)
+- [Einstein Generative AI Documentation](https://help.salesforce.com/s/articleView?id=sf.einstein_gpt_home.htm&type=5)
+- [Agentforce Documentation](https://help.salesforce.com/s/articleView?id=sf.agentforce_overview.htm&type=5)
+
+## Checklist for New Scratch Orgs
+
+Before creating a scratch org, ensure:
+
+- [ ] Dev Hub org has Data Cloud licenses
+- [ ] Salesforce CLI is installed and up to date
+- [ ] Authenticated to Dev Hub org
+- [ ] Scratch org definition file includes `Einstein1AIPlatform` feature
+- [ ] `enableEinsteinGptPlatform` is set to `true`
+- [ ] `enableAgentPlatform` is set to `true`
+- [ ] Edition is set to `Developer` or `Enterprise`
+- [ ] Appropriate duration days configured (max 30)
+- [ ] Descriptive alias provided for easy identification
+
+## Quick Start Command
+
+For quick scratch org creation with Agentforce and Data Cloud:
+
+```bash
+# One-line command to create and open
+sf org create scratch -f config/project-scratch-def.json -a agentforce-dev -d 30 -s && sf org open
+```
+
+This ensures every scratch org created in your project is ready for Agentforce agent development, Prompt Builder, Model Builder, and Data Cloud integration.
