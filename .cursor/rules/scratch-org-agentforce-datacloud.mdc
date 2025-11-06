@@ -232,25 +232,6 @@ sf org create scratch \
 sf org open
 ```
 
-## Integration with CI/CD
-
-### GitHub Actions Example
-```yaml
-name: Create Agentforce Scratch Org
-on: [push]
-jobs:
-  create-scratch:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Salesforce CLI
-        run: npm install -g @salesforce/cli
-      - name: Authenticate Dev Hub
-        run: echo "${{ secrets.DEVHUB_AUTH_URL }}" | sf org login sfdx-url --set-default-dev-hub
-      - name: Create Scratch Org
-        run: sf org create scratch --definition-file config/project-scratch-def.json --duration-days 1 --wait 10
-```
-
 ## Documentation References
 
 - [Scratch Org Access - Salesforce Developer Guide](https://developer.salesforce.com/docs/einstein/genai/guide/scratch-org.html)
