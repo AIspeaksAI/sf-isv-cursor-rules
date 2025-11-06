@@ -1,0 +1,753 @@
+---
+description: Official Salesforce scratch org definition file reference - never hallucinate configuration values
+globs: config/**/*scratch*.json
+alwaysApply: false
+---
+# Scratch Org Definition File Reference
+
+**CRITICAL RULE**: When working with `project-scratch-def.json` or any scratch org definition file, NEVER hallucinate or assume configuration values. ONLY use the configuration options documented in this reference, which is compiled from official Salesforce documentation.
+
+**Official Documentation Sources**:
+- [Scratch Org Definition File](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_scratch_orgs_def_file.htm)
+- [Configuration Values Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_scratch_orgs_def_file_config_values.htm)
+
+## File Structure
+
+A scratch org definition file is a JSON file with the following structure:
+
+```json
+{
+  "orgName": "string",
+  "edition": "string",
+  "country": "string (optional)",
+  "username": "string (optional)",
+  "adminEmail": "string (optional)",
+  "description": "string (optional)",
+  "language": "string (optional)",
+  "features": ["array of feature strings"],
+  "settings": {
+    "settingName": {
+      "settingProperty": "value"
+    }
+  },
+  "objectSettings": {
+    "objectName": {
+      "sharingModel": "string"
+    }
+  },
+  "hasSampleData": false,
+  "orgPreferences": {
+    "enabled": ["array of preference strings"],
+    "disabled": ["array of preference strings"]
+  }
+}
+```
+
+## Required Properties
+
+### edition (REQUIRED)
+Specifies the Salesforce edition for the scratch org.
+
+**Valid Values**:
+- `"Developer"`
+- `"Enterprise"`
+- `"Group"`
+- `"Professional"`
+
+**Example**:
+```json
+{
+  "edition": "Developer"
+}
+```
+
+### orgName (REQUIRED)
+The name of the scratch org.
+
+**Example**:
+```json
+{
+  "orgName": "My Scratch Org"
+}
+```
+
+## Optional Properties
+
+### country
+The country for the org. Default is "US".
+
+**Valid Values**: Any valid ISO 3166-1 alpha-2 country code (e.g., "US", "GB", "FR", "DE", "JP")
+
+**Example**:
+```json
+{
+  "country": "US"
+}
+```
+
+### username
+The username for the admin user. If not specified, Salesforce generates one.
+
+**Format**: Must be in email format but doesn't need to be a real email address.
+
+**Example**:
+```json
+{
+  "username": "admin@mycompany.org"
+}
+```
+
+### adminEmail
+The email address for the admin user.
+
+**Example**:
+```json
+{
+  "adminEmail": "admin@mycompany.com"
+}
+```
+
+### description
+Description of the scratch org.
+
+**Example**:
+```json
+{
+  "description": "Scratch org for feature development"
+}
+```
+
+### language
+The default language for the org. Default is "en_US".
+
+**Valid Values**: Any valid Salesforce locale code (e.g., "en_US", "en_GB", "fr", "de", "es", "ja")
+
+**Example**:
+```json
+{
+  "language": "en_US"
+}
+```
+
+### hasSampleData
+Whether to include sample data in the scratch org.
+
+**Valid Values**: `true` or `false` (default: `false`)
+
+**Example**:
+```json
+{
+  "hasSampleData": false
+}
+```
+
+## Features Array
+
+The `features` array enables specific Salesforce features. ONLY use features from this validated list:
+
+### Core Platform Features
+- `"API"`
+- `"AuthorApex"`
+- `"Communities"`
+- `"ContactsToMultipleAccounts"`
+- `"ContractApprovals"`
+- `"CustomerSelfService"`
+- `"CustomApps"`
+- `"CustomTab"`
+- `"DebugApex"`
+- `"DefaultWorkflowUser"`
+- `"Entitlements"`
+- `"ExternalSharing"`
+- `"FlowRunTimeApi"`
+- `"ForceComPlatform"`
+- `"Interaction"`
+- `"IoT"`
+- `"Knowledge"`
+- `"LightningExperience"`
+- `"LiveAgent"`
+- `"LiveMessage"`
+- `"MultiCurrency"`
+- `"PersonAccounts"`
+- `"ProcessBuilder"`
+- `"SalesWave"`
+- `"ServiceCloud"`
+- `"ServiceWave"`
+- `"SiteDotCom"`
+- `"Sites"`
+- `"StateAndCountryPicklist"`
+- `"Workflow"`
+
+### Einstein and AI Features
+- `"Einstein"`
+- `"EinsteinAgentStudio"`
+- `"EinsteinBots"`
+- `"EinsteinConversationInsights"`
+- `"EinsteinDocumentCapture"`
+- `"EinsteinGenerativeAI"`
+- `"Einstein1AIPlatform"` (Enables Agentforce, Prompt Builder, Model Builder)
+- `"EinsteinPlatform"`
+
+### Security and Identity Features
+- `"Identity"`
+- `"IdentityConnect"`
+- `"SingleSignOn"`
+- `"EnableSetPasswordInApi"`
+- `"TwoFactorAuthentication"`
+
+### Sales and Service Features
+- `"SalesConsole"`
+- `"ServiceConsole"`
+- `"SalesforceIQ"`
+- `"CascadeDelete"`
+- `"MaxApexCodeSize"`
+- `"MaxCustomLabels"`
+
+### Developer and Integration Features
+- `"ChangeDataCapture"`
+- `"EventLogFile"`
+- `"EventMonitoring"`
+- `"FieldAuditTrail"`
+- `"FieldHistoryTracking"`
+- `"DataPipelines"`
+
+### Mobile Features
+- `"SalesforceMobileApp"`
+- `"MobileOffline"`
+
+**Example**:
+```json
+{
+  "features": [
+    "Einstein1AIPlatform",
+    "EnableSetPasswordInApi",
+    "Communities",
+    "ServiceCloud",
+    "FlowRunTimeApi"
+  ]
+}
+```
+
+## Settings Object
+
+The `settings` object configures various Salesforce settings. ONLY use settings from this validated list:
+
+### lightningExperienceSettings
+Controls Lightning Experience configuration.
+
+**Valid Properties**:
+- `"enableS1DesktopEnabled"`: boolean - Enable Lightning Experience
+
+**Example**:
+```json
+{
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    }
+  }
+}
+```
+
+### einsteinGptSettings
+Controls Einstein Generative AI settings.
+
+**Valid Properties**:
+- `"enableEinsteinGptPlatform"`: boolean - Enable Einstein Generative AI platform
+
+**Example**:
+```json
+{
+  "settings": {
+    "einsteinGptSettings": {
+      "enableEinsteinGptPlatform": true
+    }
+  }
+}
+```
+
+### agentPlatformSettings
+Controls Agentforce platform settings.
+
+**Valid Properties**:
+- `"enableAgentPlatform"`: boolean - Enable Agentforce capabilities
+
+**Example**:
+```json
+{
+  "settings": {
+    "agentPlatformSettings": {
+      "enableAgentPlatform": true
+    }
+  }
+}
+```
+
+### mobileSettings
+Controls mobile app settings.
+
+**Valid Properties**:
+- `"enableS1EncryptedStoragePref2"`: boolean
+- `"enableMobileLiteAccess"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "mobileSettings": {
+      "enableS1EncryptedStoragePref2": false
+    }
+  }
+}
+```
+
+### securitySettings
+Controls security-related settings.
+
+**Valid Properties**:
+- `"enableAdminLoginAsAnyUser"`: boolean
+- `"enableAuditFieldsInactiveOwner"`: boolean
+- `"enableRequireHttpsConnection"`: boolean
+- `"sessionSettings"`: object with properties:
+  - `"forceRelogin"`: boolean
+  - `"sessionTimeout"`: string (e.g., "TwoHours", "FourHours", "EightHours", "TwelveHours")
+
+**Example**:
+```json
+{
+  "settings": {
+    "securitySettings": {
+      "enableAdminLoginAsAnyUser": true,
+      "sessionSettings": {
+        "forceRelogin": false,
+        "sessionTimeout": "TwelveHours"
+      }
+    }
+  }
+}
+```
+
+### chatterSettings
+Controls Chatter configuration.
+
+**Valid Properties**:
+- `"enableChatter"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "chatterSettings": {
+      "enableChatter": true
+    }
+  }
+}
+```
+
+### communitiesSettings
+Controls Experience Cloud (Communities) settings.
+
+**Valid Properties**:
+- `"enableNetworksEnabled"`: boolean
+- `"enableInvitationsEnabled"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "communitiesSettings": {
+      "enableNetworksEnabled": true
+    }
+  }
+}
+```
+
+### languageSettings
+Controls language and translation settings.
+
+**Valid Properties**:
+- `"enableTranslationWorkbench"`: boolean
+- `"enablePlatformLanguage"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "languageSettings": {
+      "enableTranslationWorkbench": true
+    }
+  }
+}
+```
+
+### searchSettings
+Controls search configuration.
+
+**Valid Properties**:
+- `"enableEinsteinSearchNaturalLanguage"`: boolean
+- `"enableCustomTabs"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "searchSettings": {
+      "enableEinsteinSearchNaturalLanguage": true
+    }
+  }
+}
+```
+
+### pathAssistantSettings
+Controls Path Assistant configuration.
+
+**Valid Properties**:
+- `"enablePathAssistant"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "pathAssistantSettings": {
+      "enablePathAssistant": true
+    }
+  }
+}
+```
+
+### entitlementSettings
+Controls entitlement management.
+
+**Valid Properties**:
+- `"enableEntitlements"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "entitlementSettings": {
+      "enableEntitlements": true
+    }
+  }
+}
+```
+
+### knowledgeSettings
+Controls Salesforce Knowledge settings.
+
+**Valid Properties**:
+- `"enableKnowledge"`: boolean
+- `"enableLightningKnowledge"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "knowledgeSettings": {
+      "enableKnowledge": true,
+      "enableLightningKnowledge": true
+    }
+  }
+}
+```
+
+### caseSettings
+Controls Case management settings.
+
+**Valid Properties**:
+- `"enableEarlyEscalationRuleTriggers"`: boolean
+- `"enableEmailToCase"`: boolean
+- `"enableWebToCase"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "caseSettings": {
+      "enableEmailToCase": true
+    }
+  }
+}
+```
+
+### workDotComSettings
+Controls Work.com settings.
+
+**Valid Properties**:
+- `"enableWorkDotCom"`: boolean
+
+**Example**:
+```json
+{
+  "settings": {
+    "workDotComSettings": {
+      "enableWorkDotCom": true
+    }
+  }
+}
+```
+
+## objectSettings Object
+
+Configure sharing models for standard and custom objects.
+
+**Valid Sharing Models**:
+- `"Private"`
+- `"Public"`
+- `"ReadOnly"`
+- `"ReadWrite"`
+- `"ControlledByParent"`
+- `"ControlledByCampaign"`
+- `"ControlledByLeadOrContact"`
+
+**Example**:
+```json
+{
+  "objectSettings": {
+    "account": {
+      "sharingModel": "ReadWrite"
+    },
+    "contact": {
+      "sharingModel": "ReadWrite"
+    },
+    "opportunity": {
+      "sharingModel": "Private"
+    },
+    "case": {
+      "sharingModel": "ReadOnly"
+    }
+  }
+}
+```
+
+## orgPreferences Object
+
+Enable or disable specific org preferences.
+
+**Structure**:
+```json
+{
+  "orgPreferences": {
+    "enabled": ["preference1", "preference2"],
+    "disabled": ["preference3", "preference4"]
+  }
+}
+```
+
+**Common Preferences**:
+- `"S1DesktopEnabled"` - Enable Lightning Experience
+- `"ChatterEnabled"` - Enable Chatter
+- `"IsAccountTeamsEnabled"` - Enable Account Teams
+- `"IsOpportunityTeamEnabled"` - Enable Opportunity Teams
+- `"ShowViewHierarchyLink"` - Show View Hierarchy link
+- `"IsQuoteEnabled"` - Enable Quotes
+- `"IsContractHistoryTrackingEnabled"` - Enable Contract History
+- `"IsOrderEnabled"` - Enable Orders
+- `"IsReductionOrdersEnabled"` - Enable Reduction Orders
+- `"IsWorkOrderEnabled"` - Enable Work Orders
+- `"IsAssetEnabled"` - Enable Assets
+
+**Example**:
+```json
+{
+  "orgPreferences": {
+    "enabled": [
+      "S1DesktopEnabled",
+      "ChatterEnabled",
+      "IsAccountTeamsEnabled"
+    ],
+    "disabled": [
+      "IsOpportunityTeamEnabled"
+    ]
+  }
+}
+```
+
+## Complete Example: Agentforce-Enabled Scratch Org
+
+```json
+{
+  "orgName": "Agentforce Development Org",
+  "edition": "Developer",
+  "country": "US",
+  "language": "en_US",
+  "description": "Scratch org for Agentforce and Einstein development",
+  "hasSampleData": false,
+  "features": [
+    "Einstein1AIPlatform",
+    "EnableSetPasswordInApi",
+    "Communities",
+    "ServiceCloud",
+    "FlowRunTimeApi",
+    "LightningExperience"
+  ],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "einsteinGptSettings": {
+      "enableEinsteinGptPlatform": true
+    },
+    "agentPlatformSettings": {
+      "enableAgentPlatform": true
+    },
+    "mobileSettings": {
+      "enableS1EncryptedStoragePref2": false
+    },
+    "securitySettings": {
+      "enableAdminLoginAsAnyUser": true,
+      "sessionSettings": {
+        "forceRelogin": false,
+        "sessionTimeout": "TwelveHours"
+      }
+    },
+    "chatterSettings": {
+      "enableChatter": true
+    }
+  },
+  "objectSettings": {
+    "account": {
+      "sharingModel": "ReadWrite"
+    },
+    "contact": {
+      "sharingModel": "ReadWrite"
+    },
+    "case": {
+      "sharingModel": "ReadWrite"
+    }
+  }
+}
+```
+
+## Complete Example: Basic Development Scratch Org
+
+```json
+{
+  "orgName": "Basic Dev Org",
+  "edition": "Developer",
+  "features": [
+    "EnableSetPasswordInApi",
+    "LightningExperience"
+  ],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "securitySettings": {
+      "sessionSettings": {
+        "forceRelogin": false
+      }
+    }
+  }
+}
+```
+
+## Validation Rules
+
+When creating or modifying a scratch org definition file:
+
+1. **NEVER** invent feature names - ONLY use features from the documented list above
+2. **NEVER** invent setting names - ONLY use settings from the documented list above
+3. **ALWAYS** use correct JSON syntax with proper quoting and commas
+4. **ALWAYS** ensure `edition` and `orgName` are present (required fields)
+5. **ALWAYS** validate that features are compatible with the chosen edition
+6. **NEVER** assume a setting exists - verify it's in the documented list
+7. **ALWAYS** use correct data types (boolean for enable flags, strings for names)
+8. **NEVER** mix up `features` array with `settings` object properties
+
+## Edition Compatibility
+
+### Developer Edition
+- Supports most features including Einstein1AIPlatform (with Dev Hub licenses)
+- Free and available to all developers
+- Recommended for development and testing
+
+### Enterprise Edition
+- Supports all features
+- Required for some advanced features
+- Requires appropriate licenses
+
+### Group Edition
+- Limited feature support
+- Not recommended for modern development
+
+### Professional Edition
+- Limited feature support
+- Does not support Apex or API access by default
+- Not recommended for development
+
+## Common Mistakes to Avoid
+
+❌ **WRONG** - Inventing feature names:
+```json
+{
+  "features": ["EinsteinAI", "AgentForce", "GenAI"]
+}
+```
+
+✅ **CORRECT** - Using documented feature names:
+```json
+{
+  "features": ["Einstein1AIPlatform"]
+}
+```
+
+❌ **WRONG** - Inventing settings:
+```json
+{
+  "settings": {
+    "einsteinSettings": {
+      "enableEinstein": true
+    }
+  }
+}
+```
+
+✅ **CORRECT** - Using documented settings:
+```json
+{
+  "settings": {
+    "einsteinGptSettings": {
+      "enableEinsteinGptPlatform": true
+    }
+  }
+}
+```
+
+❌ **WRONG** - Missing required fields:
+```json
+{
+  "features": ["Einstein1AIPlatform"]
+}
+```
+
+✅ **CORRECT** - Including required fields:
+```json
+{
+  "orgName": "My Org",
+  "edition": "Developer",
+  "features": ["Einstein1AIPlatform"]
+}
+```
+
+## When in Doubt
+
+If you are unsure about a configuration option:
+
+1. **CHECK** this reference document first
+2. **DO NOT** assume or invent configuration values
+3. **ASK** the user if a specific feature or setting is needed
+4. **VERIFY** against the official Salesforce documentation links at the top of this document
+5. **USE** the minimal valid configuration and let the user add more if needed
+
+## Minimal Valid Configuration
+
+The absolute minimum valid scratch org definition:
+
+```json
+{
+  "orgName": "My Scratch Org",
+  "edition": "Developer"
+}
+```
+
+This creates a basic Developer Edition scratch org with default settings. Build from this foundation and add only documented features and settings as needed.
